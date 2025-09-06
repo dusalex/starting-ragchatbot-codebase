@@ -16,12 +16,33 @@ cd backend && uv run uvicorn app:app --reload --port 8000
 
 ### Environment Setup
 ```bash
-# Install dependencies
-uv sync
+# Install dependencies (including dev tools)
+uv sync --extra dev
 
 # Set up environment variables
 cp .env.example .env
 # Edit .env to add your ANTHROPIC_API_KEY
+```
+
+### Code Quality
+```bash
+# Format code with black and isort
+./scripts/format.sh
+
+# Run linting with flake8
+./scripts/lint.sh
+
+# Run type checking with mypy
+./scripts/typecheck.sh
+
+# Run all quality checks
+./scripts/quality.sh
+
+# Manual commands (alternative to scripts)
+uv run black .                    # Format code
+uv run isort .                    # Sort imports
+uv run flake8 backend/            # Lint code
+uv run mypy backend/              # Type check
 ```
 
 ### Application Access
@@ -88,8 +109,9 @@ Simple HTML/JS interface (`frontend/`) communicates via REST API with session ma
 - `backend/` - Python FastAPI application
 - `frontend/` - Static HTML/CSS/JS files  
 - `docs/` - Course script files for processing
+- `scripts/` - Development and quality check scripts
 - `run.sh` - Application startup script
-- `pyproject.toml` - uv dependency management
+- `pyproject.toml` - uv dependency management with dev tools
 
 The system automatically processes course documents from `/docs` folder on startup and maintains persistent vector storage in `./chroma_db`.
 - Always use uv to run the server, do not use pip directly
