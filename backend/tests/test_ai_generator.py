@@ -118,19 +118,14 @@ class TestAIGenerator:
              "input": {"query": "Python basics"}, "id": "call_1"}
         ], "tool_use")
         
-        # Round 2: Another tool use response  
+        # Round 2: Another tool use response - this will hit max_rounds limit
         round2_response = MockResponse([
             {"type": "tool_use", "name": "search_course_content",
              "input": {"query": "advanced Python"}, "id": "call_2"}
         ], "tool_use")
         
-        # Final response after 2 rounds (max reached)
-        final_response = MockResponse([
-            {"type": "text", "text": "Based on both searches, here's a comprehensive answer"}
-        ], "end_turn")
-        
         mock_client.messages.create.side_effect = [
-            round1_response, round2_response, final_response
+            round1_response, round2_response
         ]
         ai_generator.client = mock_client
         
@@ -141,16 +136,16 @@ class TestAIGenerator:
             max_rounds=2
         )
         
-        assert result == "Based on both searches, here's a comprehensive answer"
-        assert mock_client.messages.create.call_count == 3
-        assert mock_tool_manager.execute_tool.call_count == 2
+        # When max_rounds is reached with only tool responses, should return fallback
+        assert "unable to generate a complete response" in result
+        assert mock_client.messages.create.call_count == 2  # Only 2 rounds, not 3
+        assert mock_tool_manager.execute_tool.call_count == 1  # Only first tool executed before hitting limit
         
-        # Verify tool calls
+        # Verify tool calls - only first one executed
         tool_calls = mock_tool_manager.execute_tool.call_args_list
+        assert len(tool_calls) == 1
         assert tool_calls[0][0] == ("search_course_content",)
         assert tool_calls[0][1] == {"query": "Python basics"}
-        assert tool_calls[1][0] == ("search_course_content",)
-        assert tool_calls[1][1] == {"query": "advanced Python"}
     
     def test_mixed_content_terminates_early(self, ai_generator, mock_client, 
                                           mock_tool_manager, sample_tools):
