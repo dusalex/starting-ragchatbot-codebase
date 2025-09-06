@@ -5,23 +5,107 @@
     padding: 0;
 }
 
-/* CSS Variables */
-:root {
+/* Screen Reader Only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 
+ * THEME SYSTEM - CSS Custom Properties Implementation
+ * 
+ * This design system maintains consistent visual hierarchy across both themes:
+ * 
+ * VISUAL HIERARCHY STRUCTURE:
+ * 1. Primary Actions: --primary-color (#2563eb) - Consistent across themes
+ * 2. Background Levels: --background → --surface → --surface-hover (depth progression)
+ * 3. Text Hierarchy: --text-primary (high contrast) → --text-secondary (medium contrast)
+ * 4. Interactive States: --focus-ring, --shadow for consistent feedback
+ * 5. Message Types: --user-message, --assistant-message for clear conversation flow
+ * 
+ * DESIGN LANGUAGE PRINCIPLES:
+ * - Consistent spacing and typography across themes
+ * - Maintained contrast ratios for accessibility (WCAG AA/AAA compliance)
+ * - Preserved interaction patterns and visual feedback
+ * - Cohesive color story with semantic meaning
+ */
+
+/* CSS Variables - Dark Theme (Default) */
+:root,
+:root[data-theme="dark"] {
+    /* Primary brand colors - consistent across themes */
     --primary-color: #2563eb;
     --primary-hover: #1d4ed8;
-    --background: #0f172a;
-    --surface: #1e293b;
-    --surface-hover: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border-color: #334155;
-    --user-message: #2563eb;
-    --assistant-message: #374151;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    --radius: 12px;
-    --focus-ring: rgba(37, 99, 235, 0.2);
-    --welcome-bg: #1e3a5f;
-    --welcome-border: #2563eb;
+    
+    /* Background hierarchy - dark theme */
+    --background: #0f172a;          /* App background */
+    --surface: #1e293b;             /* Cards, sidebar */
+    --surface-hover: #334155;       /* Interactive surface states */
+    
+    /* Text hierarchy - optimized for dark backgrounds */
+    --text-primary: #f1f5f9;        /* High contrast text */
+    --text-secondary: #94a3b8;      /* Supporting text */
+    
+    /* Structural elements */
+    --border-color: #334155;        /* Subtle borders */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);  /* Depth shadows */
+    --radius: 12px;                 /* Consistent border radius */
+    --focus-ring: rgba(37, 99, 235, 0.2);  /* Accessibility focus */
+    
+    /* Message system */
+    --user-message: #2563eb;        /* User message background */
+    --assistant-message: #374151;   /* AI message background */
+    
+    /* Special areas */
+    --welcome-bg: #1e3a5f;          /* Welcome message background */
+    --welcome-border: #2563eb;      /* Welcome message accent */
+}
+
+/* Light Mode Variables - Enhanced for Accessibility */
+/* Support both class-based and data-theme approaches */
+:root.light,
+:root[data-theme="light"] {
+    /* Background colors - Clean whites and light grays */
+    --background: #ffffff;
+    --surface: #f8fafc;
+    --surface-hover: #e2e8f0;
+    
+    /* Text colors - High contrast dark grays */
+    --text-primary: #0f172a;        /* Enhanced from #1e293b for better contrast (AAA compliant) */
+    --text-secondary: #475569;      /* Enhanced from #64748b for better contrast (AA compliant) */
+    
+    /* Border and structural colors */
+    --border-color: #cbd5e1;        /* Enhanced from #e2e8f0 for better visibility */
+    
+    /* Message colors */
+    --user-message: #2563eb;        /* Maintained - good contrast on light backgrounds */
+    --assistant-message: #f1f5f9;   /* Light gray background for assistant messages */
+    
+    /* Interactive states */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);  /* Slightly enhanced shadow for better depth */
+    --focus-ring: rgba(37, 99, 235, 0.3);          /* Enhanced focus ring opacity */
+    
+    /* Special areas */
+    --welcome-bg: #eff6ff;          /* Softer blue background */
+    --welcome-border: #2563eb;      /* Maintained primary blue */
+}
+
+/* Global Theme Transitions - Smooth transitions for all theme changes */
+*,
+*::before,
+*::after {
+    transition: 
+        background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Base Styles */
@@ -46,9 +130,24 @@ body {
     padding: 0;
 }
 
-/* Header - Hidden */
+/* Header */
 header {
-    display: none;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem 2rem;
+    flex-shrink: 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-text {
+    flex: 1;
 }
 
 header h1 {
@@ -65,6 +164,95 @@ header h1 {
     font-size: 0.95rem;
     color: var(--text-secondary);
     margin-top: 0.5rem;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: var(--background);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.theme-toggle:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+    box-shadow: var(--shadow);
+}
+
+.theme-toggle:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Theme Toggle Icons */
+.theme-toggle .sun-icon,
+.theme-toggle .moon-icon {
+    position: absolute;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    stroke-width: 2.5;
+}
+
+/* Default (dark mode) - show sun icon */
+.theme-toggle .sun-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle .moon-icon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.8);
+}
+
+/* Light mode - show moon icon */
+:root.light .theme-toggle .sun-icon,
+:root[data-theme="light"] .theme-toggle .sun-icon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.8);
+}
+
+:root.light .theme-toggle .moon-icon,
+:root[data-theme="light"] .theme-toggle .moon-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+/* Enhanced Theme Toggle States */
+.theme-toggle.toggling {
+    transform: scale(0.9);
+    pointer-events: none; /* Prevent clicks during transition */
+}
+
+.theme-toggle.toggling .sun-icon,
+.theme-toggle.toggling .moon-icon {
+    animation: iconSpin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes iconSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(0.8); opacity: 0.5; }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Enhanced Theme Transition States */
+.theme-transitioning * {
+    transition-duration: 0.3s !important;
 }
 
 /* Main Content Area with Sidebar */
@@ -477,6 +665,39 @@ header h1 {
     margin: 0.5rem 0;
 }
 
+/* Light Theme Adjustments for Messages and Code */
+:root.light .error-message,
+:root[data-theme="light"] .error-message {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;  /* Darker red for better contrast on light backgrounds */
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+:root.light .success-message,
+:root[data-theme="light"] .success-message {
+    background: rgba(34, 197, 94, 0.08);
+    color: #16a34a;  /* Darker green for better contrast on light backgrounds */
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+/* Enhanced code block styling for light theme */
+:root.light .message-content code,
+:root[data-theme="light"] .message-content code {
+    background-color: rgba(100, 116, 139, 0.12);  /* Light gray background */
+    color: #374151;  /* Dark text for readability */
+}
+
+:root.light .message-content pre,
+:root[data-theme="light"] .message-content pre {
+    background-color: rgba(100, 116, 139, 0.08);  /* Subtle background for code blocks */
+    border: 1px solid var(--border-color);  /* Add subtle border */
+}
+
+:root.light .message-content pre code,
+:root[data-theme="light"] .message-content pre code {
+    color: #1f2937;  /* Darker text in code blocks */
+}
+
 /* New Chat Button */
 .new-chat-button {
     width: 100%;
@@ -748,8 +969,22 @@ details[open] .suggested-header::before {
         padding: 1rem;
     }
     
+    .header-content {
+        gap: 1rem;
+    }
+    
     header h1 {
         font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .theme-toggle {
+        width: 44px;
+        height: 44px;
+        border-width: 1.5px;
     }
     
     .chat-messages {

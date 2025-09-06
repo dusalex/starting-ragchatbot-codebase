@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton, themeToggle;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,8 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     newChatButton = document.getElementById('newChatButton');
+    themeToggle = document.getElementById('themeToggle');
     
     setupEventListeners();
+    initializeTheme();
     createNewSession();
     loadCourseStats();
 });
@@ -32,6 +34,41 @@ function setupEventListeners() {
     
     // New chat button
     newChatButton.addEventListener('click', startNewChat);
+    
+    // Theme toggle button
+    if (themeToggle) {
+        let isToggling = false;
+        
+        // Enhanced click handler with visual feedback
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleThemeToggle();
+        });
+        
+        // Support keyboard navigation
+        themeToggle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleThemeToggle();
+            }
+        });
+        
+        // Prevent rapid toggling and add visual feedback
+        function handleThemeToggle() {
+            if (isToggling) return; // Prevent rapid clicking
+            
+            isToggling = true;
+            themeToggle.classList.add('toggling');
+            
+            toggleTheme();
+            
+            // Reset after animation completes
+            setTimeout(() => {
+                isToggling = false;
+                themeToggle.classList.remove('toggling');
+            }, 300);
+        }
+    }
     
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
@@ -216,4 +253,83 @@ async function loadCourseStats() {
             courseTitles.innerHTML = '<span class="error">Failed to load courses</span>';
         }
     }
+}
+
+// Theme Management Functions
+function initializeTheme() {
+    // Check for saved theme preference or default to 'dark'
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const defaultTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    setTheme(defaultTheme);
+    
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    // Add smooth transition class for enhanced animation
+    document.documentElement.classList.add('theme-transitioning');
+    
+    // Apply new theme
+    setTheme(newTheme);
+    
+    // Remove transition class after animation completes
+    setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+    }, 300);
+}
+
+function setTheme(theme) {
+    const root = document.documentElement;
+    
+    if (theme === 'light') {
+        // Set both class and data-theme attribute for maximum compatibility
+        root.classList.add('light');
+        root.setAttribute('data-theme', 'light');
+        
+        if (themeToggle) {
+            themeToggle.setAttribute('aria-label', 'Switch to dark theme');
+            themeToggle.setAttribute('title', 'Switch to dark theme');
+        }
+    } else {
+        // Remove light class and set dark theme
+        root.classList.remove('light');
+        root.setAttribute('data-theme', 'dark');
+        
+        if (themeToggle) {
+            themeToggle.setAttribute('aria-label', 'Switch to light theme');
+            themeToggle.setAttribute('title', 'Switch to light theme');
+        }
+    }
+    
+    // Save theme preference
+    localStorage.setItem('theme', theme);
+    
+    // Announce theme change to screen readers
+    announceThemeChange(theme);
+}
+
+function announceThemeChange(theme) {
+    // Create a temporary announcement for screen readers
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'sr-only';
+    announcement.textContent = `Theme changed to ${theme} mode`;
+    
+    document.body.appendChild(announcement);
+    
+    // Remove the announcement after it's been read
+    setTimeout(() => {
+        document.body.removeChild(announcement);
+    }, 1000);
 }
